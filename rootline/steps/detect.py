@@ -62,9 +62,17 @@ def rows(payload: dict, *keys: str) -> list:
     return []
 
 
+_FIELD = re.compile(r'"(ticket_id|git_sha|run_label)"\s*:\s*"([^"]*)"')
+
+
 def row_input(row: dict) -> dict:
-    """ticket_id, git_sha and run_label come from the workflow span input preview."""
-    return as_dict(row.get("input_preview"))
+    """ticket_id, git_sha and run_label come from the workflow span input preview.
+    Long conversations truncate the preview mid-JSON, so fall back to the leading fields."""
+    preview = row.get("input_preview")
+    parsed = as_dict(preview)
+    if parsed:
+        return parsed
+    return dict(_FIELD.findall(str(preview or "")))
 
 
 def row_passed(row: dict) -> bool | None:
@@ -250,7 +258,8 @@ def run(state: dict) -> dict:
         good_rows.sort(key=lambda row: row.get("created_at") or "", reverse=True)
         for row in good_rows:
             sha = str(row_input(row).get("git_sha") or "")
-            if row_passed(row) and sha and sha not in bad_shas and sha != "unknown":
+            # A passing descendant of the bad commit is a fix, not the last good version.
+            if row_passed(row) and sha and sha not in bad_shas and sha != "unknown" and not (bad_shas and on_branch(bad_shas[0], sha)):
                 last_good = sha
                 break
     except Exception as exc:

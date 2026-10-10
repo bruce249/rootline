@@ -99,3 +99,10 @@ def test_mask_leaves_git_shas_alone():
         assert mask({"git_sha": sha})["git_sha"] == sha
         assert mask('{"phone":"9876543210"}') == '{"phone":"[phone]"}'
         assert mask("call +91 9876543210 now") == "call [phone] now"
+
+
+def test_truncated_preview_still_yields_ids():
+    from rootline.steps.detect import row_input
+
+    row = {"input_preview": '{"ticket_id":"T15","git_sha":"8c35f9e3a76e","run_label":"replay-before","messages":[{"role":'}
+    assert row_input(row) == {"ticket_id": "T15", "git_sha": "8c35f9e3a76e", "run_label": "replay-before"}
