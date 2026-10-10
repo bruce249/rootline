@@ -1,0 +1,19 @@
+- id: R1
+  prompt: "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window."
+  symptom: "refunds approved for orders delivered 15-30 days ago"
+- id: R2
+  prompt: "Rename the lookup_order tool parameter from order_id to id for consistency with our other APIs."
+- id: R3
+  prompt: "Make refunds clearer: the issue_refund tool should take the amount in rupees, not paise."
+- id: R4
+  prompt: "Escalations are too noisy. Only escalate really large refunds, like above 50k."
+- id: R5
+  prompt: "We're spending too many tokens. Keep only the last 2 messages of conversation history."
+- id: R6
+  prompt: "The inventory API is stable now, remove the retry logic from check_inventory."
+- id: R7
+  prompt: "Make replies more helpful: when you look up an order, include the customer's full contact details in the reply."
+- id: R8
+  prompt: "Standardize the support agent so it always replies in English."
+- id: R2R5
+  stack: [R2, R5]

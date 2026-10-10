@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rootline {{ run_id }}</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #f6f3ee; --fg: #1c1915; --card: #fffdf9; --line: #e4ddd2; --accent: #0f6e56; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #141210; --fg: #f4efe6; --card: #221f1b; --line: #3a342c; --accent: #8fd0b8; }
+    }
+    body { margin: 0; font: 16px/1.5 Georgia, serif; background: var(--bg); color: var(--fg); }
+    main { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+    h1 { font-size: 32px; line-height: 1.2; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
+    blockquote { margin: 0; padding-left: 12px; border-left: 3px solid var(--accent); }
+    pre { white-space: pre-wrap; word-break: break-word; font: 13px/1.45 ui-monospace, monospace; }
+    a { color: var(--accent); }
+    .meta { color: #6d655c; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Rootline {{ run_id }}</h1>
+  <p class="meta">Status {{ status }} · attempt {{ attempts }} · fix mode {{ fix_mode }}</p>
+  <section>
+    <h2>Failure</h2>
+    <p>{{ failure_signature }}</p>
+    <p>Confidence {{ confidence }}</p>
+  </section>
+  <section>
+    <h2>Wrong assumption</h2>
+    <blockquote>{{ assumption_quote }}</blockquote>
+    <p>{{ why_wrong }}</p>
+    <p><strong>Source of truth.</strong> {{ source_of_truth }}</p>
+  </section>
+  <section>
+    <h2>Verification</h2>
+    <pre>{{ verify }}</pre>
+  </section>
+  <section>
+    <h2>Links</h2>
+    <ul>
+      {% if bad_checkpoint_url %}<li><a href="{{ bad_checkpoint_url }}">Bad checkpoint</a></li>{% endif %}
+      {% if fix_checkpoint_url %}<li><a href="{{ fix_checkpoint_url }}">Fix checkpoint</a></li>{% endif %}
+      {% for trace in before_traces %}
+        {% if trace.url %}<li><a href="{{ trace.url }}">Trace {{ trace.ticket_id }}</a></li>{% endif %}
+      {% endfor %}
+    </ul>
+    {% if trail %}<pre>{{ trail }}</pre>{% endif %}
+  </section>
+  <section>
+    <h2>Diff</h2>
+    <pre>{{ diff }}</pre>
+  </section>
+  <section>
+    <h2>Attempts</h2>
+    <pre>{{ errors }}</pre>
+  </section>
+</main>
+</body>
+</html>

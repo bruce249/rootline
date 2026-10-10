@@ -1,0 +1,222 @@
+[
+  {
+    "order_id": "KC-1001",
+    "customer_name": "Ananya Shah",
+    "phone": "9811111001",
+    "email": "ananya.shah@example.com",
+    "items": ["Darjeeling first flush 250g"],
+    "amount_paise": 129900,
+    "delivered_on": "2026-09-30",
+    "status": "delivered",
+    "sku": "DARJEELING-250"
+  },
+  {
+    "order_id": "KC-1002",
+    "customer_name": "Rohan Iyer",
+    "phone": "9822221002",
+    "email": "rohan.iyer@example.com",
+    "items": ["Masala chai 100g"],
+    "amount_paise": 159900,
+    "delivered_on": "2026-09-27",
+    "status": "delivered",
+    "sku": "MASALA-CHAI-100"
+  },
+  {
+    "order_id": "KC-1003",
+    "customer_name": "Meera Nair",
+    "phone": "9833331003",
+    "email": "meera.nair@example.com",
+    "items": ["Assam orthodox 500g"],
+    "amount_paise": 89900,
+    "delivered_on": "2026-10-07",
+    "status": "delivered",
+    "sku": "ASSAM-500"
+  },
+  {
+    "order_id": "KC-1004",
+    "customer_name": "Kabir Das",
+    "phone": "9844441004",
+    "email": "kabir.das@example.com",
+    "items": ["Nilgiri 1kg"],
+    "amount_paise": 149900,
+    "delivered_on": "2026-10-03",
+    "status": "delivered",
+    "sku": "NILGIRI-1KG"
+  },
+  {
+    "order_id": "KC-1005",
+    "customer_name": "Sara Khan",
+    "phone": "9855551005",
+    "email": "sara.khan@example.com",
+    "items": ["Assam orthodox 500g"],
+    "amount_paise": 99900,
+    "delivered_on": "2026-10-09",
+    "status": "delivered",
+    "sku": "ASSAM-500"
+  },
+  {
+    "order_id": "KC-1006",
+    "customer_name": "Dev Patel",
+    "phone": "9866661006",
+    "email": "dev.patel@example.com",
+    "items": ["Darjeeling first flush 250g"],
+    "amount_paise": 199900,
+    "delivered_on": "2026-09-26",
+    "status": "delivered",
+    "sku": "DARJEELING-250"
+  },
+  {
+    "order_id": "KC-1007",
+    "customer_name": "Lata Menon",
+    "phone": "9877771007",
+    "email": "lata.menon@example.com",
+    "items": ["Masala chai 100g"],
+    "amount_paise": 109900,
+    "delivered_on": "2026-10-02",
+    "status": "delivered",
+    "sku": "MASALA-CHAI-100"
+  },
+  {
+    "order_id": "KC-1008",
+    "customer_name": "Arjun Rao",
+    "phone": "9888881008",
+    "email": "arjun.rao@example.com",
+    "items": ["Assam orthodox 500g"],
+    "amount_paise": 139900,
+    "delivered_on": "2026-09-25",
+    "status": "delivered",
+    "sku": "ASSAM-500"
+  },
+  {
+    "order_id": "KC-1009",
+    "customer_name": "Neel Joshi",
+    "phone": "9899991009",
+    "email": "neel.joshi@example.com",
+    "items": ["Nilgiri 1kg"],
+    "amount_paise": 89000,
+    "delivered_on": "2026-09-22",
+    "status": "delivered",
+    "sku": "NILGIRI-1KG"
+  },
+  {
+    "order_id": "KC-1010",
+    "customer_name": "Pooja Reddy",
+    "phone": "9711111010",
+    "email": "pooja.reddy@example.com",
+    "items": ["Darjeeling first flush 250g"],
+    "amount_paise": 210000,
+    "delivered_on": "2026-09-10",
+    "status": "delivered",
+    "sku": "DARJEELING-250"
+  },
+  {
+    "order_id": "KC-1011",
+    "customer_name": "Imran Qureshi",
+    "phone": "9722221011",
+    "email": "imran.qureshi@example.com",
+    "items": ["Masala chai 100g"],
+    "amount_paise": 175000,
+    "delivered_on": "2026-09-18",
+    "status": "delivered",
+    "sku": "MASALA-CHAI-100"
+  },
+  {
+    "order_id": "KC-1012",
+    "customer_name": "Fatima Sheikh",
+    "phone": "9733331012",
+    "email": "fatima.sheikh@example.com",
+    "items": ["Assam orthodox 500g"],
+    "amount_paise": 99000,
+    "delivered_on": "2026-08-31",
+    "status": "delivered",
+    "sku": "ASSAM-500"
+  },
+  {
+    "order_id": "KC-1013",
+    "customer_name": "Vikram Sethi",
+    "phone": "9744441013",
+    "email": "vikram.sethi@example.com",
+    "items": ["Gift hamper"],
+    "amount_paise": 650000,
+    "delivered_on": "2026-10-06",
+    "status": "delivered",
+    "sku": "HAMPER-GIFT"
+  },
+  {
+    "order_id": "KC-1014",
+    "customer_name": "Aisha Banerjee",
+    "phone": "9755551014",
+    "email": "aisha.banerjee@example.com",
+    "items": ["Gift hamper"],
+    "amount_paise": 899900,
+    "delivered_on": "2026-10-04",
+    "status": "delivered",
+    "sku": "HAMPER-GIFT"
+  },
+  {
+    "order_id": "KC-1015",
+    "customer_name": "Harsh Gupta",
+    "phone": "9766661015",
+    "email": "harsh.gupta@example.com",
+    "items": ["Gift hamper"],
+    "amount_paise": 749900,
+    "delivered_on": "2026-10-05",
+    "status": "delivered",
+    "sku": "HAMPER-GIFT"
+  },
+  {
+    "order_id": "KC-1016",
+    "customer_name": "Nisha Kulkarni",
+    "phone": "9777771016",
+    "email": "nisha.kulkarni@example.com",
+    "items": ["Assam orthodox 500g"],
+    "amount_paise": 45900,
+    "delivered_on": "2026-10-08",
+    "status": "delivered",
+    "sku": "ASSAM-500"
+  },
+  {
+    "order_id": "KC-1017",
+    "customer_name": "Omar Farooq",
+    "phone": "9788881017",
+    "email": "omar.farooq@example.com",
+    "items": ["Darjeeling first flush 250g"],
+    "amount_paise": 220000,
+    "delivered_on": "2026-10-01",
+    "status": "delivered",
+    "sku": "DARJEELING-250"
+  },
+  {
+    "order_id": "KC-1018",
+    "customer_name": "Priya Bose",
+    "phone": "9799991018",
+    "email": "priya.bose@example.com",
+    "items": ["Nilgiri 1kg"],
+    "amount_paise": 310000,
+    "delivered_on": "2026-09-29",
+    "status": "delivered",
+    "sku": "NILGIRI-1KG"
+  },
+  {
+    "order_id": "KC-1019",
+    "customer_name": "Rahul Jain",
+    "phone": "9611111019",
+    "email": "rahul.jain@example.com",
+    "items": ["Gift hamper"],
+    "amount_paise": 540000,
+    "delivered_on": "2026-09-20",
+    "status": "delivered",
+    "sku": "HAMPER-GIFT"
+  },
+  {
+    "order_id": "KC-1020",
+    "customer_name": "Sana Mir",
+    "phone": "9622221020",
+    "email": "sana.mir@example.com",
+    "items": ["Masala chai 100g"],
+    "amount_paise": 180000,
+    "delivered_on": "2026-09-28",
+    "status": "delivered",
+    "sku": "MASALA-CHAI-100"
+  }
+]

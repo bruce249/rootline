@@ -1,0 +1,7 @@
+{
+  "note": "Leave null until a real bench run records cost, tokens, and minutes. Do not invent figures.",
+  "avg_investigation_cost_usd": null,
+  "avg_investigation_tokens": null,
+  "avg_investigation_minutes": null,
+  "ec2_monthly_usd": null
+}
