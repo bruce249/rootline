@@ -44,7 +44,7 @@ uv run rootline resume <run_id>
 uv run rootline report <run_id> --open
 ```
 
-Baseline numbers below are filled only after a real run. None have been recorded yet.
+Baseline on commit `71319f7`, 10 October 2026: **24/24** passed. The result file is `evals/out/baseline-71319f7-20261010T135708Z.json`.
 
 ## What is still human-operated
 
