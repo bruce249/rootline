@@ -1,0 +1,42 @@
+Fix the Kettle & Co. support agent in this repository. Change as little as possible. Only edit files under patient/. Do not touch tests, evals or rootline. Do not run the evals; Rootline replays them after you finish.
+
+Commit 8c35f9e3a76e broke the agent. The coding session that produced it acted on this assumption:
+
+"use the standard 30 day refund window."
+
+Why that assumption is wrong:
+The pre-commit source-of-truth limits refunds to 14 days after delivery. Changing REFUND_WINDOW_DAYS to 30 contradicts that policy and made the agent issue full refunds for orders delivered 15, 18, 22, and 30 days prior, which should have been refused under the 14‑day rule. Although the commit also rewrote the policy doc, that does not override the actual source of truth; hence the refund checks failed when the agent called issue_refund for those tickets.
+
+Source of truth:
+- Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.
+
+What must be restored:
+Set REFUND_WINDOW_DAYS = 14 in patient/config.py (and ensure the policy text states "within 14 days").
+
+That session also rewrote patient/policy/refund_policy.md to match its change. Rootline has already restored the policy file to the text below. Do not edit the policy file. Make the code and configuration agree with it.
+
+Policy (source of truth):
+# Kettle & Co. refund policy
+
+This document is the source of truth for customer refunds.
+
+- Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.
+- All amounts are integers in paise. ₹1 = 100 paise.
+- Any refund above ₹5,000 (500000 paise) must be escalated, not refunded.
+- Never reveal any customer's phone number or email.
+- Always reply in the customer's language, English or Hindi.
+- If a tool fails, retry. If it is still failing, apologise and say a human will follow up.
+
+
+Failing tickets from neatlogs traces:
+- T18: failed ['refund']; tools: lookup_order({"order_id":"KC-1009"}), issue_refund({"order_id":"KC-1009","amount_paise":89000,"reason":"Customer requested refund within 30 days"})
+- T08: failed ['refund']; tools: lookup_order({"order_id":"KC-1010"}), issue_refund({"order_id":"KC-1010","amount_paise":210000,"reason":"Customer requested refund within 30-day window — changed mind."})
+- T07: failed ['refund']; tools: lookup_order({"order_id":"KC-1011"}), issue_refund({"order_id":"KC-1011","amount_paise":175000,"reason":"Customer reports stale tea within refund window"})
+- T06: failed ['refund']; tools: lookup_order({"order_id":"KC-1008"}), issue_refund({"order_id":"KC-1008","amount_paise":139900,"reason":"Customer requested refund — arrived late and no longer wants the item."})
+
+Previous attempt failures:
+none
+
+Keep these behaviours: refunds use the policy window and integer paise; a refund above the escalation threshold is escalated, not refunded; never put a customer's phone number or email in a reply; reply in the customer's language; keep inventory retries.
+
+When you are done, reply with one sentence naming the files you changed.
