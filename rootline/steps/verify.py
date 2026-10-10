@@ -8,15 +8,19 @@ from pathlib import Path
 import neatlogs
 
 from rootline.clients.git import repo_root
-from rootline.clients.neatlogs_mcp import triage_accept, triage_update_status
+from rootline.clients.neatlogs_mcp import triage_accept, triage_update, triage_update_status
+from rootline.clients.workspace import ensure_worktree
 from rootline.runner import RetryFix
+from rootline.state import now
 
 
-def _run_evals(root: Path, label: str, only: list[str] | None) -> dict:
-    command = [sys.executable, "-m", "evals.run_evals", "--label", label]
+def run_evals(label: str, patient_dir: Path, session: str, only: list[str] | None = None) -> dict:
+    """Replay tickets with this checkout's harness against the patient in patient_dir."""
+    root = repo_root()
+    command = [sys.executable, "-m", "evals.run_evals", "--label", label, "--patient-dir", str(patient_dir), "--session", session]
     if only:
         command.extend(["--only", ",".join(only)])
-    proc = subprocess.run(command, cwd=root, capture_output=True, text=True)
+    proc = subprocess.run(command, cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if proc.returncode != 0:
         raise RuntimeError((proc.stderr or proc.stdout)[-2000:])
     wrote = ""
@@ -28,50 +32,60 @@ def _run_evals(root: Path, label: str, only: list[str] | None) -> dict:
     return json.loads(Path(wrote).read_text(encoding="utf-8"))
 
 
-def _failing_ids(summary: dict) -> list[str]:
-    return [row["ticket_id"] for row in summary.get("results") or [] if not row.get("passed")]
+def failing(summary: dict) -> list[dict]:
+    return [
+        {"ticket_id": row["ticket_id"], "failed_checks": row.get("failed_checks") or []}
+        for row in summary.get("results") or []
+        if not row.get("passed")
+    ]
 
 
 @neatlogs.span(kind="AGENT", name="verify")
 def run(state: dict) -> dict:
-    root = repo_root()
     detect = state["outputs"]["DETECT"]
-    wanted = []
-    for trace in detect.get("failing_traces") or []:
-        ticket_id = trace.get("ticket_id")
-        if ticket_id and ticket_id not in wanted:
-            wanted.append(ticket_id)
-    focused = _run_evals(root, "replay-after", wanted or None)
-    full = _run_evals(root, "replay-after-full", None)
-    focused_failed = _failing_ids(focused)
-    full_failed = _failing_ids(full)
-    passed = not focused_failed and not full_failed
+    fix = state["outputs"]["FIX"]
+    cwd = ensure_worktree(state)
+    run_id = state["run_id"]
+    attempt = state.get("attempt", 1)
+    summary = run_evals(f"replay-after-{run_id}-a{attempt}", cwd, session=f"rootline-{run_id}")
+    still = failing(summary)
+    target = sorted({item["ticket_id"] for item in detect.get("failing_traces") or [] if item.get("ticket_id")})
+    before = detect.get("before") or {}
     result = {
-        "passed": passed,
-        "focused_passed": focused.get("passed"),
-        "focused_total": focused.get("total"),
-        "full_passed": full.get("passed"),
-        "full_total": full.get("total"),
-        "still_failing": full_failed,
-        "attempt": state.get("attempt"),
+        "passed": not still,
+        "after_passed": summary.get("passed"),
+        "after_total": summary.get("total"),
+        "after_sha": summary.get("git_sha"),
+        "before_passed": before.get("passed"),
+        "before_total": before.get("total"),
+        "target_tickets": target,
+        "target_fixed": [ticket for ticket in target if ticket not in {item["ticket_id"] for item in still}],
+        "still_failing": still,
+        "attempt": attempt,
+        "fix_commit": fix.get("commit"),
     }
-    if not passed:
-        raise RetryFix(
-            f"verify failed on attempt {state.get('attempt')}: {', '.join(full_failed) or ', '.join(focused_failed)}"
-        )
-    opinions = detect.get("second_opinion") or []
+    if still:
+        detail = "; ".join(f"{item['ticket_id']} {item['failed_checks']}" for item in still)
+        raise RetryFix(f"verify attempt {attempt}: {summary.get('passed')}/{summary.get('total')} passed; still failing: {detail}")
+
     notes = []
-    for opinion in opinions:
-        fix = (opinion or {}).get("fix") or {}
-        fix_id = str(fix.get("id") or "")
-        if not fix_id:
+    explain = state["outputs"].get("EXPLAIN") or {}
+    for card in detect.get("second_opinion") or []:
+        card_id = str((card or {}).get("id") or (card or {}).get("triage_id") or "")
+        if not card_id:
             continue
         try:
-            if str(fix.get("status") or "").lower() == "draft":
-                triage_accept(fix_id)
-            triage_update_status(fix_id, "resolved", f"verified by Rootline run {state['run_id']}")
-            notes.append(fix_id)
+            if str(card.get("status") or "").lower() == "draft":
+                triage_accept(card_id)
+            triage_update(
+                card_id,
+                root_cause=f"Commit {str(explain.get('commit'))[:7]}: \"{explain.get('assumption_quote')}\". {explain.get('why_wrong')}",
+                evidence_reasoning=f"Rootline run {run_id}: {before.get('passed')}/{before.get('total')} before, {summary.get('passed')}/{summary.get('total')} after.",
+            )
+            triage_update_status(card_id, "resolved", f"Verified by Rootline run {run_id}, fix {str(fix.get('commit'))[:7]}")
+            notes.append({"triage_id": card_id, "ok": True})
         except Exception as exc:
-            notes.append(f"{fix_id}: {exc}")
+            notes.append({"triage_id": card_id, "ok": False, "error": str(exc)[:300]})
+            state["errors"].append({"step": "VERIFY", "error": f"triage {card_id}: {exc}", "at": now()})
     result["triage_updates"] = notes
     return result

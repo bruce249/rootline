@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-STEPS = ["DETECT", "LOCATE", "EXPLAIN", "FIX", "VERIFY", "REPORT"]
+STEPS = ["DETECT", "LOCATE", "EXPLAIN", "FIX", "VERIFY", "GUARD", "REPORT"]
 RUNS = Path(".rootline") / "runs"
 
 

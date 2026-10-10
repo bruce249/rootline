@@ -1,84 +1,109 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import neatlogs
 
-from rootline.clients.brain_mcp import available as brain_available
 from rootline.clients.entire import checkpoint_explain, search
 from rootline.clients.external import call_external
+from rootline.clients.git import git
 from rootline.clients.llm import complete, parse_json, read_prompt
+from rootline.state import now
 
-_POLICY = Path("patient/policy/refund_policy.md")
-
-
-def _norm(text: str) -> str:
-    return " ".join((text or "").split())
+POLICY = "patient/policy/refund_policy.md"
 
 
-def _quote_ok(quote: str, transcript: str) -> bool:
-    if not quote or not transcript:
-        return False
-    return _norm(quote) in _norm(transcript)
+def norm(text: str) -> str:
+    return " ".join((text or "").split()).lower()
+
+
+def quote_ok(quote: str, *sources: str) -> bool:
+    wanted = norm(quote)
+    return bool(wanted) and any(wanted in norm(source) for source in sources if source)
+
+
+def policy_before(sha: str) -> str:
+    """The policy as it stood before the suspect commit. A coding session can
+    rewrite the policy file itself, so the current file is not a safe oracle."""
+    try:
+        return git("show", f"{sha}^:{POLICY}")
+    except Exception:
+        return ""
+
+
+def _compact_traces(traces: list[dict]) -> list[dict]:
+    keep = ("ticket_id", "failed_checks", "customer_message", "reply", "tool_calls")
+    return [{key: trace.get(key) for key in keep} for trace in traces[:4]]
 
 
 @neatlogs.span(kind="AGENT", name="explain")
 def run(state: dict) -> dict:
     detect = state["outputs"]["DETECT"]
     locate = state["outputs"]["LOCATE"]
-    suspects = list(locate.get("candidates") or [])
-    policy = _POLICY.read_text(encoding="utf-8") if _POLICY.exists() else ""
     signature = detect.get("failure_signature") or ""
     search_hits = ""
     try:
         search_hits = call_external(state, "EXPLAIN", lambda: search(signature, limit=5))
     except Exception as exc:
-        state["errors"].append({"step": "EXPLAIN", "error": f"search: {exc}", "at": state.get("updated_at")})
-    brain_note = None
-    if brain_available():
-        brain_note = "brain command is installed; no query schema was confirmed, so no lesson was fetched"
+        state["errors"].append({"step": "EXPLAIN", "error": f"search: {exc}", "at": now()})
+
     chosen = None
-    for suspect in suspects[:2]:
+    for suspect in (locate.get("candidates") or [])[:2]:
+        sha = suspect["sha"]
+        prov = suspect.get("provenance") or []
+        prompts = sorted({item["prompt"] for item in prov if item.get("prompt")})
+        checkpoint = next((item["checkpoint_id"] for item in prov if item.get("checkpoint_id")), None)
         transcript = ""
         evidence_level = "checkpoint"
         try:
-            transcript = call_external(state, "EXPLAIN", lambda sha=suspect["sha"]: checkpoint_explain(sha))
+            transcript = call_external(state, "EXPLAIN", lambda ref=checkpoint or sha: checkpoint_explain(ref, full=True))
         except Exception as exc:
             evidence_level = "diff_only"
-            state["errors"].append({"step": "EXPLAIN", "error": f"checkpoint: {exc}", "at": state.get("updated_at")})
+            state["errors"].append({"step": "EXPLAIN", "error": f"checkpoint: {exc}", "at": now()})
+        before = policy_before(sha)
+        after = git("show", f"{sha}:{POLICY}") if suspect.get("edits_source_of_truth") else before
         user = json.dumps(
             {
-                "signature": signature,
-                "failing_traces": detect.get("failing_traces"),
-                "commit": suspect.get("sha"),
+                "failure_signature": signature,
+                "failing_traces": _compact_traces(detect.get("failing_traces") or []),
+                "commit": sha,
+                "commit_subject": suspect.get("subject"),
                 "diff": suspect.get("diff"),
-                "transcript": transcript[:12000],
-                "search_hits": search_hits[:4000],
-                "policy": policy,
+                "session_prompts": prompts,
+                "line_provenance": prov,
+                "commit_edits_source_of_truth": bool(suspect.get("edits_source_of_truth")),
+                "policy_before_commit": before,
+                "policy_after_commit": after,
+                "transcript": transcript[:16000],
+                "entire_search_hits": search_hits[:3000],
             }
         )
         parsed = parse_json(complete(read_prompt("explain.md"), user))
         quote = str(parsed.get("assumption_quote") or "")
-        if transcript and not _quote_ok(quote, transcript):
+        if not quote_ok(quote, transcript, *prompts):
             parsed = parse_json(
                 complete(
                     read_prompt("explain.md"),
-                    user + "\nThe previous assumption_quote was not a verbatim substring of the transcript. Quote the transcript exactly.",
+                    user + "\nYour previous assumption_quote was not a verbatim substring of the transcript or session prompts. Copy the text exactly.",
                 )
             )
             quote = str(parsed.get("assumption_quote") or "")
+        verified = quote_ok(quote, transcript, *prompts)
         confidence = float(parsed.get("confidence") or 0)
-        if not _quote_ok(quote, transcript):
+        if not verified:
             confidence = min(confidence, 0.3)
-            if not transcript:
-                evidence_level = "diff_only"
         parsed.update(
             {
-                "commit": parsed.get("commit") or suspect.get("sha"),
+                "commit": sha,
                 "assumption_quote": quote,
+                "quote_verified": verified,
                 "confidence": confidence,
-                "evidence_level": evidence_level,
+                "evidence_level": evidence_level if transcript else "diff_only",
+                "checkpoint_id": checkpoint,
+                "session_prompts": prompts,
+                "provenance": prov,
+                "policy_tampered": bool(suspect.get("edits_source_of_truth")) and before != after,
+                "policy_before": before,
                 "transcript_excerpt": transcript[:2000],
             }
         )
@@ -86,15 +111,6 @@ def run(state: dict) -> dict:
         if confidence >= 0.6:
             break
     if chosen is None:
-        chosen = {
-            "commit": "",
-            "file": "",
-            "assumption_quote": "",
-            "why_wrong": "",
-            "source_of_truth": policy.splitlines()[0] if policy else "",
-            "confidence": 0.0,
-            "evidence_level": "diff_only",
-        }
-    chosen["brain"] = brain_note
-    chosen["search_hits"] = search_hits[:4000]
+        chosen = {"commit": "", "file": "", "assumption_quote": "", "why_wrong": "", "source_of_truth": "", "confidence": 0.0, "evidence_level": "none"}
+    chosen["search_hits"] = search_hits[:3000]
     return chosen

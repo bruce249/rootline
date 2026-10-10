@@ -38,12 +38,13 @@ def complete(system: str, user: str) -> str:
     model = os.environ.get("ROOTLINE_MODEL") or "gpt-5"
     kwargs = {
         "model": model,
-        "temperature": 0,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
     }
+    if not model.startswith("gpt-5"):
+        kwargs["temperature"] = 0
     try:
         response = client.chat.completions.create(**kwargs)
     except Exception as exc:

@@ -28,11 +28,24 @@ class EvalCheckFailed(Exception):
         self.ledger = ledger
 
 
+@neatlogs.span(kind="TOOL", tool_name="eval_check")
+def eval_check(ticket_id: str, git_sha: str, run_label: str, failed_checks: list[str]) -> dict:
+    """Record the verdict as its own span so investigators can read it from the trace."""
+    return {
+        "ticket_id": ticket_id,
+        "git_sha": git_sha,
+        "run_label": run_label,
+        "passed": not failed_checks,
+        "failed_checks": failed_checks,
+    }
+
+
 @neatlogs.span(kind="WORKFLOW", name="support-ticket")
 def handle_ticket(ticket_id: str, git_sha: str, run_label: str, messages: list) -> dict:
     ledger = Ledger(ticket_id)
     reply = run_ticket(messages, ledger)
     failed = check(TICKETS[ticket_id], reply, ledger)
+    eval_check(ticket_id, git_sha, run_label, failed)
     if failed:
         short = git_sha[:7] if git_sha and git_sha != "unknown" else git_sha
         raise EvalCheckFailed(

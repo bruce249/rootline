@@ -40,13 +40,17 @@ def build_system() -> str:
 
 
 def _create(client, messages: list[dict]):
+    model = _patient_model()
     kwargs = {
-        "model": _patient_model(),
-        "temperature": 0,
+        "model": model,
         "messages": messages,
         "tools": TOOL_SCHEMAS,
         "tool_choice": "auto",
     }
+    # gpt-5 models reject temperature=0. Sending it anyway leaves an errored LLM
+    # span in every trace, which makes trace status useless as a failure signal.
+    if not model.startswith("gpt-5"):
+        kwargs["temperature"] = 0
     try:
         return client.chat.completions.create(**kwargs)
     except Exception as exc:
