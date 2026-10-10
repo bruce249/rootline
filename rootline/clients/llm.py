@@ -11,6 +11,11 @@ from rootline.tracing import get_client
 
 _PROMPTS = Path(__file__).resolve().parents[1] / "prompts"
 
+# Token usage of every call in this process, read from the API responses.
+# neatlogs does not always attribute large LLM spans to the trace totals, so
+# runs also keep their own count.
+USAGE: list[dict] = []
+
 
 def read_prompt(name: str) -> str:
     return (_PROMPTS / name).read_text(encoding="utf-8")
@@ -52,4 +57,13 @@ def complete(system: str, user: str) -> str:
             raise
         kwargs.pop("temperature")
         response = client.chat.completions.create(**kwargs)
+    usage = getattr(response, "usage", None)
+    if usage is not None:
+        USAGE.append(
+            {
+                "model": getattr(response, "model", model),
+                "prompt_tokens": int(getattr(usage, "prompt_tokens", 0) or 0),
+                "completion_tokens": int(getattr(usage, "completion_tokens", 0) or 0),
+            }
+        )
     return (response.choices[0].message.content or "").strip()

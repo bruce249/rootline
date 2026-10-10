@@ -26,3 +26,14 @@ def git(*args: str, cwd: str | Path | None = None) -> str:
         detail = proc.stderr.strip() or proc.stdout.strip() or "git failed"
         raise RuntimeError(detail)
     return proc.stdout
+
+
+def is_ancestor(ancestor: str, descendant: str) -> bool:
+    """Untraced: a "no" answer is exit code 1, which is not an error worth a red span."""
+    proc = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=str(repo_root()),
+        capture_output=True,
+        text=True,
+    )
+    return proc.returncode == 0

@@ -66,9 +66,19 @@ def _traced(state: dict) -> dict:
         run_pending(state, _steps())
         return {"run_id": run_id, "status": state["status"], "attempt": state["attempt"]}
 
+    from rootline.clients.llm import USAGE
+
+    seen = len(USAGE)
     try:
         return investigation(state["run_id"], state["branch"], state["attempt"])
     finally:
+        calls = USAGE[seen:]
+        usage = state.setdefault("llm_usage", {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "models": []})
+        usage["calls"] += len(calls)
+        usage["prompt_tokens"] += sum(call["prompt_tokens"] for call in calls)
+        usage["completion_tokens"] += sum(call["completion_tokens"] for call in calls)
+        usage["models"] = sorted(set(usage["models"]) | {call["model"] for call in calls})
+        save(state)
         neatlogs.flush()
 
 
@@ -116,69 +126,114 @@ def report(
         webbrowser.open(Path(html).resolve().as_uri())
 
 
+def _window_rows(query: str, workflow: str, start: str, end: str) -> list[dict]:
+    from rootline.clients.neatlogs_mcp import search_traces
+    from rootline.steps.detect import rows
+
+    out: list[dict] = []
+    for offset in range(0, 1000, 100):
+        page = rows(search_traces(query, limit=100, offset=offset, workflow_name=workflow, date_from=start, date_to=end), "results")
+        out.extend(page)
+        if len(page) < 100:
+            break
+    return out
+
+
+def _shift(stamp: str, minutes: int) -> str:
+    from datetime import datetime, timedelta
+
+    moment = datetime.fromisoformat(stamp) + timedelta(minutes=minutes)
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 @app.command()
 def costs(
     write_business: bool = typer.Option(True, help="Also write business/unit_costs.json."),
 ) -> None:
     """Measure what investigations cost, from neatlogs traces of finished runs."""
     load_dotenv()
+    from datetime import datetime
+
+    from rootline.steps.detect import as_dict, row_input, rows, window_start
     from rootline.clients.neatlogs_mcp import search_traces
-    from rootline.steps.detect import rows, window_start
 
     per_run = []
     for path in sorted(RUNS.glob("*/state.json")):
         state = json.loads(path.read_text(encoding="utf-8"))
         if state.get("status") not in {"COMPLETE", "ESCALATED_TO_HUMAN"}:
             continue
-        found = rows(search_traces(state["run_id"], limit=100, date_from=window_start("30d")), "results")
-        rootline = [row for row in found if row.get("workflow_name") == "rootline-investigation" or row.get("root_span_name") == "rootline-investigation"]
-        replays = [row for row in found if row.get("workflow_name") == "support-ticket"]
-        cost = sum(float(row.get("cost_usd") or 0) for row in rootline + replays)
-        tokens = sum(int(row.get("total_tokens") or 0) for row in rootline + replays)
-        minutes = sum(float(row.get("duration_ms") or 0) for row in rootline) / 60000
+        run_id = state["run_id"]
+        start, end = _shift(state["started_at"], -1), _shift(state["updated_at"], 2)
+        rootline = [
+            row
+            for row in _window_rows("rootline-investigation", "rootline-investigation", start, end)
+            if as_dict(row.get("input_preview")).get("run_id") == run_id
+        ]
+        replays = [
+            row
+            for row in _window_rows("support-ticket", "support-ticket", start, end)
+            if str(row_input(row).get("run_label") or "").startswith(f"replay-after-{run_id}")
+        ]
+        expected = 24 * int(state.get("attempt") or 1)
+        minutes = (datetime.fromisoformat(state["updated_at"]) - datetime.fromisoformat(state["started_at"])).total_seconds() / 60
+        resumed = bool(state.get("resumed_at"))
         per_run.append(
             {
-                "run_id": state["run_id"],
+                "run_id": run_id,
                 "status": state["status"],
                 "attempts": state.get("attempt"),
+                "resumed": resumed,
                 "rootline_traces": len(rootline),
-                "replay_traces": len(replays),
+                "replay_traces_found": len(replays),
+                "replay_traces_expected": expected,
                 "rootline_cost_usd": round(sum(float(row.get("cost_usd") or 0) for row in rootline), 6),
+                "rootline_tokens": sum(int(row.get("total_tokens") or 0) for row in rootline),
                 "replay_cost_usd": round(sum(float(row.get("cost_usd") or 0) for row in replays), 6),
-                "total_cost_usd": round(cost, 6),
-                "total_tokens": tokens,
-                "minutes": round(minutes, 2),
+                "replay_tokens": sum(int(row.get("total_tokens") or 0) for row in replays),
+                "wall_minutes": round(minutes, 2),
+                "rootline_llm_usage_local": state.get("llm_usage"),
             }
         )
         typer.echo(json.dumps(per_run[-1]))
     tickets = rows(search_traces("support-ticket", limit=100, workflow_name="support-ticket", date_from=window_start("7d")), "results")
     ticket_costs = [float(row.get("cost_usd") or 0) for row in tickets if row.get("cost_usd")]
+    patient_avg = sum(ticket_costs) / len(ticket_costs) if ticket_costs else None
     out = {
-        "source": "neatlogs search_traces over finished Rootline runs",
+        "source": "neatlogs search_traces, matched by run id and replay label inside each run's time window",
+        "note": "Fixer agent tokens are recorded by Entire per checkpoint, not in neatlogs.",
         "runs": per_run,
-        "patient_avg_ticket_cost_usd": round(sum(ticket_costs) / len(ticket_costs), 6) if ticket_costs else None,
+        "patient_avg_ticket_cost_usd": round(patient_avg, 6) if patient_avg else None,
         "patient_tickets_sampled": len(ticket_costs),
     }
     Path("evidence").mkdir(exist_ok=True)
     Path("evidence/costs.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     typer.echo("WROTE evidence/costs.json")
-    if write_business and per_run:
+    # Only runs whose traces are fully ingested count toward unit costs.
+    complete = [
+        run for run in per_run
+        if run["rootline_traces"] and not run["resumed"] and run["replay_traces_found"] >= run["replay_traces_expected"]
+    ]
+    if not complete:
+        typer.echo("no fully ingested, unresumed run yet; business/unit_costs.json left unchanged")
+        return
+    if write_business:
         business = Path("business/unit_costs.json")
         current = json.loads(business.read_text(encoding="utf-8")) if business.exists() else {}
-        counted = [run for run in per_run if run["rootline_traces"]]
-        if counted:
-            current.update(
-                {
-                    "note": "Measured from neatlogs traces by `rootline costs`. EC2 cost is filled by hand.",
-                    "investigations_measured": len(counted),
-                    "avg_investigation_cost_usd": round(sum(r["total_cost_usd"] for r in counted) / len(counted), 4),
-                    "avg_investigation_tokens": int(sum(r["total_tokens"] for r in counted) / len(counted)),
-                    "avg_investigation_minutes": round(sum(r["minutes"] for r in counted) / len(counted), 2),
-                    "patient_avg_ticket_cost_usd": out["patient_avg_ticket_cost_usd"],
-                }
-            )
-            business.write_text(json.dumps(current, indent=2), encoding="utf-8")
-            typer.echo(f"WROTE {business}")
+        cost = [run["rootline_cost_usd"] + run["replay_cost_usd"] for run in complete]
+        tokens = [run["rootline_tokens"] + run["replay_tokens"] for run in complete]
+        current.update(
+            {
+                "note": "Measured from neatlogs traces by `rootline costs`. Excludes the fixer agent (tracked by Entire). EC2 is filled by hand.",
+                "investigations_measured": len(complete),
+                "measured_run_ids": [run["run_id"] for run in complete],
+                "avg_investigation_cost_usd": round(sum(cost) / len(cost), 4),
+                "avg_investigation_tokens": int(sum(tokens) / len(tokens)),
+                "avg_investigation_minutes": round(sum(run["wall_minutes"] for run in complete) / len(complete), 2),
+                "patient_avg_ticket_cost_usd": out["patient_avg_ticket_cost_usd"],
+            }
+        )
+        business.write_text(json.dumps(current, indent=2), encoding="utf-8")
+        typer.echo(f"WROTE {business}")
 
 
 @app.command()

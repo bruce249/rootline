@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 import neatlogs
 
 from rootline.clients.external import call_external
-from rootline.clients.git import git
+from rootline.clients.git import is_ancestor
 from rootline.clients.llm import complete
 from rootline.clients.neatlogs_mcp import (
     get_detection_trend,
@@ -63,6 +63,12 @@ def rows(payload: dict, *keys: str) -> list:
 
 
 _FIELD = re.compile(r'"(ticket_id|git_sha|run_label)"\s*:\s*"([^"]*)"')
+_SHA_OK = re.compile(r"[0-9a-f]{7,40}")
+
+
+def valid_sha(sha) -> bool:
+    """Traces written by an older, over-eager PII mask carry SHAs like '[phone]a17...'."""
+    return bool(sha) and _SHA_OK.fullmatch(str(sha)) is not None
 
 
 def row_input(row: dict) -> dict:
@@ -144,11 +150,7 @@ def evidence_from_context(row: dict, context: dict) -> dict:
 
 
 def on_branch(sha: str, branch: str) -> bool:
-    try:
-        git("merge-base", "--is-ancestor", sha, branch)
-        return True
-    except Exception:
-        return False
+    return valid_sha(sha) and is_ancestor(sha, branch)
 
 
 def _signature(evidence: list[dict]) -> str:
@@ -221,7 +223,7 @@ def run(state: dict) -> dict:
     bad_shas: list[str] = []
     for item in failing:
         sha = item.get("git_sha")
-        if sha and sha not in bad_shas:
+        if valid_sha(sha) and sha not in bad_shas:
             bad_shas.append(sha)
 
     before = None
@@ -259,7 +261,7 @@ def run(state: dict) -> dict:
         for row in good_rows:
             sha = str(row_input(row).get("git_sha") or "")
             # A passing descendant of the bad commit is a fix, not the last good version.
-            if row_passed(row) and sha and sha not in bad_shas and sha != "unknown" and not (bad_shas and on_branch(bad_shas[0], sha)):
+            if row_passed(row) and valid_sha(sha) and sha not in bad_shas and not (bad_shas and on_branch(bad_shas[0], sha)):
                 last_good = sha
                 break
     except Exception as exc:

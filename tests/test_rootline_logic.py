@@ -106,3 +106,11 @@ def test_truncated_preview_still_yields_ids():
 
     row = {"input_preview": '{"ticket_id":"T15","git_sha":"8c35f9e3a76e","run_label":"replay-before","messages":[{"role":'}
     assert row_input(row) == {"ticket_id": "T15", "git_sha": "8c35f9e3a76e", "run_label": "replay-before"}
+
+
+def test_valid_sha_rejects_masked_values():
+    from rootline.steps.detect import valid_sha
+
+    assert valid_sha("8c35f9e3a76e08ca79d5100c6fd7407f0b39239e")
+    assert not valid_sha("[phone]a179bd3dca8aef442be804372cac97")
+    assert not valid_sha("unknown") and not valid_sha(None)
