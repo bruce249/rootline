@@ -25,7 +25,8 @@ Heisenberg. Handles to publish are still pending.
 - Done in this session: repository files for the patient, evals, tests, and the Rootline loop. API keys are present in local `.env` only.
 - Verified: `uv run pytest -q` passed 9 tests. Ticket T01 passed one traced run and issued a refund of 89900 paise, in English, with no contact details in the reply.
 - Verified: full baseline on commit `71319f7` was 24/24. Result file: `evals/out/baseline-71319f7-20261010T135708Z.json` (gitignored). An earlier run on `1eed772` was 21/24 because contact-detail tickets were refunded; the system prompt now refuses those without issuing a refund.
-- Not done: Entire CLI install and `entire login`, public GitHub push, seeded regression, EC2, cfo.ai.
+- Entire CLI 0.11.4 is installed. Codex and Cursor hooks are enabled. The graph plugin is installed and the default trail runners are in `.entire/runners/`. `entire login` is waiting on browser approval.
+- Not done: public GitHub push, seeded regression, EC2, cfo.ai.
 
 ## Demo
 
