@@ -1,0 +1,56 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+  "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T16:47:43.8098347Z",
+  "branch": "bench/R1",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "patient/config.py",
+    "patient/policy/refund_policy.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "23faafdcc902",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 16,
+    "cache_creation_tokens": 23936,
+    "cache_read_tokens": 237273,
+    "output_tokens": 2431,
+    "api_call_count": 8
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T16:47:43.7873761Z",
+    "agent_lines": 2,
+    "agent_removed": 2,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 2,
+    "total_lines_changed": 4,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 117,
+      "user_lines_removed": 7,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".claude/settings.json": 101,
+        "rootline/clients/fixer.py": 16
+      },
+      "user_removed_per_file": {
+        "rootline/clients/fixer.py": 7
+      }
+    }
+  ]
+}

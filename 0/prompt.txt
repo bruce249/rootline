@@ -1,0 +1,1 @@
+Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.
