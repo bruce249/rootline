@@ -31,6 +31,31 @@ def use_patient_dir(path: str | None) -> Path:
     return patient_root
 
 
+def init_tracing() -> None:
+    """The harness owns telemetry, so every replayed patient version is traced the
+    same way and its spans are masked, including branches older than the mask."""
+    import os
+
+    from dotenv import load_dotenv
+
+    import patient.tracing as tracing
+    from evals.privacy import redact_pii
+
+    if getattr(tracing, "_started", False):
+        return
+    load_dotenv(_ROOT / ".env")
+    neatlogs.init(
+        api_key=os.environ["NEATLOGS_API_KEY"],
+        workflow_name="support-ticket",
+        tags=["patient", "kettle-co"],
+        mask=redact_pii,
+    )
+    from openai import OpenAI
+
+    tracing._client = neatlogs.wrap(OpenAI())
+    tracing._started = True
+
+
 def _sha(root: Path, short: bool = False) -> str:
     args = ["git", "-C", str(root), "rev-parse"] + (["--short=7"] if short else []) + ["HEAD"]
     try:
@@ -41,9 +66,8 @@ def _sha(root: Path, short: bool = False) -> str:
 
 def run_suite(label: str, only: list[str] | None = None, patient_root: Path | None = None, session: str | None = None) -> dict:
     from evals.harness import TICKETS, run_one
-    from patient.tracing import init_patient
 
-    init_patient()
+    init_tracing()
     root = patient_root or _ROOT
     ids = only or list(TICKETS)
     unknown = [ticket_id for ticket_id in ids if ticket_id not in TICKETS]

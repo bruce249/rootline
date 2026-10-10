@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 
+from evals.privacy import redact_pii as harness_redact
 from patient.tracing import redact_pii
 from rootline.steps.detect import row_passed, scoreboard, verdict_from_spans, window_start
 from rootline.steps.explain import quote_ok
@@ -85,3 +86,8 @@ def test_pii_is_masked_before_export():
     assert "9888881008" not in text and "arjun.rao@example.com" not in text and "9833331003" not in text
     assert masked["n"] == 3
     assert "139900" in redact_pii("amount 139900 paise")
+
+
+def test_harness_mask_matches_patient_mask():
+    sample = {"a": "call 9811111001 or ananya.shah@example.com", "b": ["+91 9833331003"]}
+    assert harness_redact(sample) == redact_pii(sample)
