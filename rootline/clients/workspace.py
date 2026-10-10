@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 
@@ -32,6 +33,14 @@ def ensure_worktree(state: dict) -> Path:
         if source.exists() and not target.exists():
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)
+    # Entire's commit hook otherwise asks on the console whether to link the
+    # fixer's session to the commit, and a headless run hangs on that prompt.
+    local = path / ".entire" / "settings.local.json"
+    local.parent.mkdir(parents=True, exist_ok=True)
+    settings = json.loads(local.read_text(encoding="utf-8")) if local.exists() else {}
+    if settings.get("commit_linking") != "always":
+        settings["commit_linking"] = "always"
+        local.write_text(json.dumps(settings, indent=2), encoding="utf-8")
     state["worktree"] = str(path)
     return path
 

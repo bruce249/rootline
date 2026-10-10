@@ -188,6 +188,11 @@ def run(state: dict) -> dict:
     if scoped:
         candidates = scoped
     candidates.sort(key=lambda row: row.get("created_at") or "", reverse=True)
+    # Investigate the newest failing deployment. Older failures on ancestor commits
+    # were already fixed or belong to a different investigation.
+    current = next((row_input(row).get("git_sha") for row in candidates if row_input(row).get("git_sha")), None)
+    if current:
+        candidates = [row for row in candidates if row_input(row).get("git_sha") == current]
 
     failing: list[dict] = []
     seen: set[tuple] = set()
@@ -214,12 +219,19 @@ def run(state: dict) -> dict:
     before = None
     if bad_shas:
         try:
-            all_rows = call_external(
-                state,
-                "DETECT",
-                lambda: search_traces(bad_shas[0], limit=100, workflow_name=WORKFLOW, date_from=start),
-            )
-            same_sha = [row for row in rows(all_rows, "results") if row_input(row).get("git_sha") == bad_shas[0]]
+            same_sha: list[dict] = []
+            for offset in range(0, 500, 100):
+                page = rows(
+                    call_external(
+                        state,
+                        "DETECT",
+                        lambda o=offset: search_traces(bad_shas[0], limit=100, offset=o, workflow_name=WORKFLOW, date_from=start),
+                    ),
+                    "results",
+                )
+                same_sha.extend(row for row in page if row_input(row).get("git_sha") == bad_shas[0])
+                if len(page) < 100:
+                    break
             before = scoreboard(same_sha)
         except Exception as exc:
             state["errors"].append({"step": "DETECT", "error": f"before: {exc}", "at": now()})

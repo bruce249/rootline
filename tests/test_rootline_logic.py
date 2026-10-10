@@ -91,3 +91,11 @@ def test_pii_is_masked_before_export():
 def test_harness_mask_matches_patient_mask():
     sample = {"a": "call 9811111001 or ananya.shah@example.com", "b": ["+91 9833331003"]}
     assert harness_redact(sample) == redact_pii(sample)
+
+
+def test_mask_leaves_git_shas_alone():
+    sha = "9876543210a179bd3dca8aef442be804372cac97"
+    for mask in (redact_pii, harness_redact):
+        assert mask({"git_sha": sha})["git_sha"] == sha
+        assert mask('{"phone":"9876543210"}') == '{"phone":"[phone]"}'
+        assert mask("call +91 9876543210 now") == "call [phone] now"

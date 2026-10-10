@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 _client = None
 _started = False
 
-_PHONE = re.compile(r"(?:\+91[\s-]?)?(?<!\d)[6-9]\d{9}(?!\d)")
+# Alphanumeric boundaries, so ten digits at the start of a git SHA are not a phone number.
+_PHONE = re.compile(r"(?<![0-9A-Za-z+])(?:\+91[\s-]?)?[6-9]\d{9}(?![0-9A-Za-z])")
 _EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 

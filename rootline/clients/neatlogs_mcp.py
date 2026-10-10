@@ -46,9 +46,22 @@ async def _call(tool: str, args: dict) -> dict:
                 return {"data": parsed}
 
 
+def _leaf(exc: BaseException) -> BaseException:
+    while isinstance(exc, BaseExceptionGroup) and exc.exceptions:
+        exc = exc.exceptions[0]
+    return exc
+
+
 @neatlogs.span(kind="MCP_TOOL", name="neatlogs_mcp")
 def call(tool: str, args: dict) -> dict:
-    return asyncio.run(_call(tool, args))
+    try:
+        return asyncio.run(_call(tool, args))
+    except BaseExceptionGroup as group:
+        # anyio task groups wrap the real error; surface it so retries and logs say what failed
+        leaf = _leaf(group)
+        if isinstance(leaf, NeatlogsMCPError):
+            raise leaf from None
+        raise NeatlogsMCPError(f"{tool}: {type(leaf).__name__}: {leaf}") from None
 
 
 def _user_email() -> str:
@@ -85,8 +98,10 @@ def search_traces(
     return call("search_traces", args)
 
 
-def get_trace_context(trace_id: str, max_chars_per_field: int = 4000) -> dict:
-    return call("get_trace_context", {"trace_id": trace_id, "max_chars_per_field": max_chars_per_field})
+def get_trace_context(trace_id: str) -> dict:
+    # Any span filter or clipping option makes this a "selective" request, which
+    # the server currently rejects with not_enabled. Ask for the whole trace.
+    return call("get_trace_context", {"trace_id": trace_id})
 
 
 def list_detections(group_id: str | None = None) -> dict:

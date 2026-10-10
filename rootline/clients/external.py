@@ -7,9 +7,9 @@ from rootline.state import now, save
 
 
 def call_external(state: dict, step: str, fn: Callable):
-    """Retry a transient external call 3 times, waiting 1s, 2s, then 4s."""
-    delay = 1.0
-    for attempt in range(3):
+    """Try a transient external call 4 times, waiting 2s, 4s, then 8s between tries."""
+    delay = 2.0
+    for attempt in range(4):
         try:
             return fn()
         except FileNotFoundError:
@@ -17,7 +17,7 @@ def call_external(state: dict, step: str, fn: Callable):
         except Exception as exc:
             state["errors"].append({"step": step, "error": str(exc), "at": now()})
             save(state)
-            if attempt == 2:
+            if attempt == 3:
                 raise
             time.sleep(delay)
             delay *= 2
