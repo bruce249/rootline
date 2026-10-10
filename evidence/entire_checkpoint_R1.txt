@@ -1,0 +1,14 @@
+● Checkpoint 01M4KBD5VKTNXSMEK8K1RY4VM7
+  session  98b2dc5b-dc72-4ea9-afec-653922ba1825
+  created  2026-10-10 16:47:43
+  author   [email] <[email]>
+  tokens   263.7k
+  commits  8c35f9e R1: Customers complain refunds are too strict. Update the suppor
+────────────────────────────────────────────────────────────
+## Intent
+
+Customers complain refunds are too strict. Update the support agent to use th...
+
+## Summary
+
+*Not generated yet. Run ‘entire checkpoint explain --generate 01M4KBD5VKTNXSMEK8K1RY4VM7‘ to create an AI summary.*

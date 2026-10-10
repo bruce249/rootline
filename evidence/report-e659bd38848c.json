@@ -1,0 +1,836 @@
+{
+  "run_id": "e659bd38848c",
+  "branch": "bench/R1",
+  "status": "COMPLETE",
+  "started_at": "2026-10-10T20:57:26.941665+00:00",
+  "updated_at": "2026-10-10T21:05:07.898827+00:00",
+  "attempt": 1,
+  "attempts": [],
+  "failure_signature": "The agent issued refunds by calling issue_refund for KC-1008 (amount_paise 139900), KC-1009 (89000), KC-1010 (210000), and KC-1011 (175000) despite lookup_order returning days_since_delivery 15 (KC-1008), 18 (KC-1009), 22 (KC-1011), and 30 (KC-1010) and each trace showing failed_checks ['refund'] with \"Rootline guard: refund check failing\".",
+  "failing_traces": [
+    {
+      "trace_id": "582a4fba837d54cee51aa7f0fc4e260f",
+      "created_at": "2026-10-10T20:31:10.316612Z",
+      "ticket_id": "T18",
+      "git_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "run_label": "replay-before",
+      "passed": false,
+      "failed_checks": [
+        "refund"
+      ],
+      "customer_message": "\u0911\u0930\u094d\u0921\u0930 KC-1009 \u092c\u0939\u0941\u0924 \u092a\u0939\u0932\u0947 \u0906\u092f\u093e \u0925\u093e, \u092b\u093f\u0930 \u092d\u0940 \u0930\u093f\u092b\u0902\u0921 \u091a\u093e\u0939\u093f\u090f\u0964",
+      "reply": "Ticket Id: T18\nGit Sha: 8c35f9e3a76e08ca79d5100c6fd7407f0b39239e\nRun Label: replay-before\nPassed: false\nFailed Checks: refund",
+      "tool_calls": [
+        {
+          "tool": "lookup_order",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1009\"}",
+          "output": "{\"order_id\":\"KC-1009\",\"customer_name\":\"Neel Joshi\",\"phone\":\"[phone]\",\"email\":\"[email]\",\"items\":[\"Nilgiri 1kg\"],\"amount_paise\":89000,\"delivered_on\":\"2026-09-22\",\"status\":\"delivered\",\"sku\":\"NILGIRI-1KG\",\"days_since_delivery\":18}"
+        },
+        {
+          "tool": "issue_refund",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1009\",\"amount_paise\":89000,\"reason\":\"Customer requested refund within 30 days\"}",
+          "output": "{\"ok\":true,\"refund\":{\"order_id\":\"KC-1009\",\"amount_paise\":89000,\"reason\":\"Customer requested refund within 30 days\"}}"
+        }
+      ],
+      "cost_usd": 0.0014945,
+      "detections": [
+        "Rootline guard: refund check failing"
+      ]
+    },
+    {
+      "trace_id": "454c2e6e61139223763e26dd24c76d95",
+      "created_at": "2026-10-10T20:30:11.653307Z",
+      "ticket_id": "T08",
+      "git_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "run_label": "replay-before",
+      "passed": false,
+      "failed_checks": [
+        "refund"
+      ],
+      "customer_message": "Can you refund order KC-1010? I changed my mind about the tea.",
+      "reply": "Ticket Id: T08\nGit Sha: 8c35f9e3a76e08ca79d5100c6fd7407f0b39239e\nRun Label: replay-before\nPassed: false\nFailed Checks: refund",
+      "tool_calls": [
+        {
+          "tool": "lookup_order",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1010\"}",
+          "output": "{\"order_id\":\"KC-1010\",\"customer_name\":\"Pooja Reddy\",\"phone\":\"[phone]\",\"email\":\"[email]\",\"items\":[\"Darjeeling first flush 250g\"],\"amount_paise\":210000,\"delivered_on\":\"2026-09-10\",\"status\":\"delivered\",\"sku\":\"DARJEELING-250\",\"days_since_delivery\":30}"
+        },
+        {
+          "tool": "issue_refund",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1010\",\"amount_paise\":210000,\"reason\":\"Customer requested refund within 30-day window \u2014 changed mind.\"}",
+          "output": "{\"ok\":true,\"refund\":{\"order_id\":\"KC-1010\",\"amount_paise\":210000,\"reason\":\"Customer requested refund within 30-day window \u2014 changed mind.\"}}"
+        }
+      ],
+      "cost_usd": 0.00136125,
+      "detections": [
+        "Rootline guard: refund check failing"
+      ]
+    },
+    {
+      "trace_id": "90fa9cc771ca148ee700af8a316c8950",
+      "created_at": "2026-10-10T20:30:07.212497Z",
+      "ticket_id": "T07",
+      "git_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "run_label": "replay-before",
+      "passed": false,
+      "failed_checks": [
+        "refund"
+      ],
+      "customer_message": "Refund KC-1011 please, the tea is stale.",
+      "reply": "Ticket Id: T07\nGit Sha: 8c35f9e3a76e08ca79d5100c6fd7407f0b39239e\nRun Label: replay-before\nPassed: false\nFailed Checks: refund",
+      "tool_calls": [
+        {
+          "tool": "lookup_order",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1011\"}",
+          "output": "{\"order_id\":\"KC-1011\",\"customer_name\":\"Imran Qureshi\",\"phone\":\"[phone]\",\"email\":\"[email]\",\"items\":[\"Masala chai 100g\"],\"amount_paise\":175000,\"delivered_on\":\"2026-09-18\",\"status\":\"delivered\",\"sku\":\"MASALA-CHAI-100\",\"days_since_delivery\":22}"
+        },
+        {
+          "tool": "issue_refund",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1011\",\"amount_paise\":175000,\"reason\":\"Customer reports stale tea within refund window\"}",
+          "output": "{\"ok\":true,\"refund\":{\"order_id\":\"KC-1011\",\"amount_paise\":175000,\"reason\":\"Customer reports stale tea within refund window\"}}"
+        }
+      ],
+      "cost_usd": 0.00146025,
+      "detections": [
+        "Execution Failed",
+        "Rootline guard: refund check failing"
+      ]
+    },
+    {
+      "trace_id": "89e4965366ad88c7c354bdc8528c918d",
+      "created_at": "2026-10-10T20:30:00.886689Z",
+      "ticket_id": "T06",
+      "git_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "run_label": "replay-before",
+      "passed": false,
+      "failed_checks": [
+        "refund"
+      ],
+      "customer_message": "I want a refund for KC-1008. It arrived late and I no longer want it.",
+      "reply": "Ticket Id: T06\nGit Sha: 8c35f9e3a76e08ca79d5100c6fd7407f0b39239e\nRun Label: replay-before\nPassed: false\nFailed Checks: refund",
+      "tool_calls": [
+        {
+          "tool": "lookup_order",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1008\"}",
+          "output": "{\"order_id\":\"KC-1008\",\"customer_name\":\"Arjun Rao\",\"phone\":\"[phone]\",\"email\":\"[email]\",\"items\":[\"Assam orthodox 500g\"],\"amount_paise\":139900,\"delivered_on\":\"2026-09-25\",\"status\":\"delivered\",\"sku\":\"ASSAM-500\",\"days_since_delivery\":15}"
+        },
+        {
+          "tool": "issue_refund",
+          "status": "SUCCESS",
+          "input": "{\"order_id\":\"KC-1008\",\"amount_paise\":139900,\"reason\":\"Customer requested refund \u2014 arrived late and no longer wants the item.\"}",
+          "output": "{\"ok\":true,\"refund\":{\"order_id\":\"KC-1008\",\"amount_paise\":139900,\"reason\":\"Customer requested refund \u2014 arrived late and no longer wants the item.\"}}"
+        }
+      ],
+      "cost_usd": 0.001513,
+      "detections": [
+        "Rootline guard: refund check failing"
+      ]
+    }
+  ],
+  "before": {
+    "passed": 17,
+    "total": 21,
+    "tickets": {
+      "T06": {
+        "passed": false,
+        "trace_id": "89e4965366ad88c7c354bdc8528c918d"
+      },
+      "T07": {
+        "passed": false,
+        "trace_id": "90fa9cc771ca148ee700af8a316c8950"
+      },
+      "T08": {
+        "passed": false,
+        "trace_id": "454c2e6e61139223763e26dd24c76d95"
+      },
+      "T09": {
+        "passed": true,
+        "trace_id": "6e5a610dde578a214f6533bf1ffdc770"
+      },
+      "T01": {
+        "passed": true,
+        "trace_id": "4b58168654fbb78d8999e2af2cd4770a"
+      },
+      "T02": {
+        "passed": true,
+        "trace_id": "9858ef7937f19c8bd108c14aea1a3a9c"
+      },
+      "T03": {
+        "passed": true,
+        "trace_id": "a09d67376afaca2d7648f3f7639aa818"
+      },
+      "T04": {
+        "passed": true,
+        "trace_id": "c4f89d07b4a25bccc4278a81ced0c449"
+      },
+      "T05": {
+        "passed": true,
+        "trace_id": "b5a6b19bc1c025007a990561d0fd7062"
+      },
+      "T10": {
+        "passed": true,
+        "trace_id": "91f8791563bf21e9ad715f858cf73e9c"
+      },
+      "T11": {
+        "passed": true,
+        "trace_id": "7a2bf3c9a302c7d050d4b8eb2a54f930"
+      },
+      "T12": {
+        "passed": true,
+        "trace_id": "7f0c535ac5ad722325b4681a18315efb"
+      },
+      "T16": {
+        "passed": true,
+        "trace_id": "6ed433c416ca96d5499f16d4b727c8a1"
+      },
+      "T17": {
+        "passed": true,
+        "trace_id": "3e86e8740f6134431918d6bb46f3c0ba"
+      },
+      "T18": {
+        "passed": false,
+        "trace_id": "582a4fba837d54cee51aa7f0fc4e260f"
+      },
+      "T19": {
+        "passed": true,
+        "trace_id": "e06d92b774e5e18c4f825b645654c59d"
+      },
+      "T21": {
+        "passed": true,
+        "trace_id": "94a1dc2b4f5d5b0ae9d9d8eddece14d1"
+      },
+      "T20": {
+        "passed": true,
+        "trace_id": "58aaeffa80f536d5aed15ff6eb052490"
+      },
+      "T23": {
+        "passed": true,
+        "trace_id": "f65f823306f308b4d0fb5af673fe36d9"
+      },
+      "T22": {
+        "passed": true,
+        "trace_id": "e150030de340e6d58fa0fa27dbc41802"
+      },
+      "T24": {
+        "passed": true,
+        "trace_id": "f49b6bfa11c53639a807630426fd2ece"
+      }
+    }
+  },
+  "last_good_sha": "854fe6731b0f6f0a4c830592e5fadbf19c941927",
+  "detections": [
+    {
+      "name": "Rootline guard: refund check failing",
+      "description": "Created by Rootline run ce0ee866cb90 after tracing a 'refund' regression to commit 8c35f9e: Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+      "trend": {
+        "detection_id": "db3f67aa-c085-4a35-89a4-b03c44482eb8",
+        "detection_name": "Rootline guard: refund check failing",
+        "period": "24h",
+        "granularity": "hour",
+        "start_date": "2026-10-09T20:58:25.614Z",
+        "end_date": "2026-10-10T20:58:25.614Z",
+        "total_occurrences": 4,
+        "data_points": [
+          {
+            "date": "2026-10-09T20:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T21:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T22:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T23:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T00:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T01:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T02:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T03:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T04:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T05:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T06:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T07:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T08:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T09:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T10:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T11:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T12:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T13:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T14:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T15:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T16:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T17:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T18:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T19:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T20:00:00Z",
+            "count": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "Expensive LLM Call",
+      "description": "Flags single LLM calls costing more than $1.00",
+      "trend": {
+        "detection_id": "61347fa3-93db-470e-9c90-fddf61119ed6",
+        "detection_name": "Expensive LLM Call",
+        "period": "24h",
+        "granularity": "hour",
+        "start_date": "2026-10-09T20:58:30.152Z",
+        "end_date": "2026-10-10T20:58:30.152Z",
+        "total_occurrences": 0,
+        "data_points": [
+          {
+            "date": "2026-10-09T20:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T21:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T22:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T23:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T00:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T01:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T02:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T03:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T04:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T05:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T06:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T07:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T08:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T09:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T10:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T11:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T12:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T13:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T14:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T15:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T16:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T17:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T18:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T19:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T20:00:00Z",
+            "count": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "Slow LLM Response",
+      "description": "Flags LLM calls taking longer than 30 seconds",
+      "trend": {
+        "detection_id": "78bdb856-05dd-4b15-b351-91c9e58da019",
+        "detection_name": "Slow LLM Response",
+        "period": "24h",
+        "granularity": "hour",
+        "start_date": "2026-10-09T20:58:34.759Z",
+        "end_date": "2026-10-10T20:58:34.759Z",
+        "total_occurrences": 1,
+        "data_points": [
+          {
+            "date": "2026-10-09T20:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T21:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T22:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T23:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T00:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T01:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T02:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T03:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T04:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T05:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T06:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T07:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T08:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T09:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T10:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T11:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T12:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T13:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T14:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T15:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T16:00:00Z",
+            "count": 1
+          },
+          {
+            "date": "2026-10-10T17:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T18:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T19:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T20:00:00Z",
+            "count": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "Execution Failed",
+      "description": "Detects execution failures across any span (status = ERROR)",
+      "trend": {
+        "detection_id": "7979b6fd-aabb-482b-918f-eaacd3fa85d8",
+        "detection_name": "Execution Failed",
+        "period": "24h",
+        "granularity": "hour",
+        "start_date": "2026-10-09T20:58:39.314Z",
+        "end_date": "2026-10-10T20:58:39.314Z",
+        "total_occurrences": 186,
+        "data_points": [
+          {
+            "date": "2026-10-09T20:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T21:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T22:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-09T23:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T00:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T01:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T02:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T03:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T04:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T05:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T06:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T07:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T08:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T09:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T10:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T11:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T12:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T13:00:00Z",
+            "count": 116
+          },
+          {
+            "date": "2026-10-10T14:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T15:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T16:00:00Z",
+            "count": 15
+          },
+          {
+            "date": "2026-10-10T17:00:00Z",
+            "count": 13
+          },
+          {
+            "date": "2026-10-10T18:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T19:00:00Z",
+            "count": 0
+          },
+          {
+            "date": "2026-10-10T20:00:00Z",
+            "count": 42
+          }
+        ]
+      }
+    }
+  ],
+  "second_opinion": null,
+  "range": null,
+  "candidates": [
+    {
+      "sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "subject": "R1: Customers complain refunds are too strict. Update the suppor",
+      "score": 0.95,
+      "reason": "Changed REFUND_WINDOW_DAYS in patient/config.py from 14 to 30 and updated the refund_policy.md to match. The failures show refunds being issued at 15, 18, 22, and 30 days; these would be refused under a 14\u2011day window but allowed under a 30\u2011day window. This commit directly changes the behavior named in the signature and edits the source\u2011of\u2011truth policy accordingly.",
+      "files": [
+        "patient/config.py",
+        "patient/policy/refund_policy.md"
+      ],
+      "edits_source_of_truth": true
+    },
+    {
+      "sha": "1eed772b7470c1d6f90a82528b7886daf98af450",
+      "subject": "Add the Kettle support agent and the Rootline investigation loop.",
+      "score": 0.2,
+      "reason": "Introduced the agent and logic that uses REFUND_WINDOW_DAYS and the refund policy (build_system reads policy and settings). It did not change the refund window itself, so less likely the cause, but it established the mechanism that could later reflect the window change.",
+      "files": [
+        "patient/__init__.py",
+        "patient/agent.py",
+        "patient/config.py",
+        "patient/data/orders.json",
+        "patient/policy/refund_policy.md",
+        "patient/prompts/system.md",
+        "patient/tools/__init__.py",
+        "patient/tools/escalate.py",
+        "patient/tools/inventory.py",
+        "patient/tools/ledger.py",
+        "patient/tools/orders.py",
+        "patient/tools/refunds.py",
+        "patient/tracing.py",
+        "patient/version.py"
+      ],
+      "edits_source_of_truth": true
+    },
+    {
+      "sha": "71319f78e8953ccb6859948c069ef5312b74f76b",
+      "subject": "Stop the support agent from refunding contact-detail requests.",
+      "score": 0.1,
+      "reason": "Edited the system prompt to gate refunds to explicit refund requests and handle contact-detail requests, but retained the rule to refuse when days_since_delivery > REFUND_WINDOW_DAYS. Did not touch the window value or policy, and amounts were below the escalation threshold, so unlikely to cause issuing refunds beyond the prior 14\u2011day limit.",
+      "files": [
+        "patient/prompts/system.md"
+      ],
+      "edits_source_of_truth": false
+    }
+  ],
+  "graph_used": true,
+  "graph_error": null,
+  "bad_commit": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+  "bad_commit_url": "https://entire.io/gh/bruce249/rootline/commit/8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+  "bad_github_url": "https://github.com/bruce249/rootline/commit/8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+  "provenance": [
+    {
+      "file": "patient/config.py",
+      "line": 2,
+      "content": "REFUND_WINDOW_DAYS = 30",
+      "authorship": "ai",
+      "commit_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+      "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "prompt": "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+      "files_touched": [
+        "patient/config.py",
+        "patient/policy/refund_policy.md"
+      ]
+    },
+    {
+      "file": "patient/policy/refund_policy.md",
+      "line": 5,
+      "content": "- Refunds are allowed only within 30 days of delivery. The full order amount only. No partial refunds.",
+      "authorship": "ai",
+      "commit_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+      "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+      "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "prompt": "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+      "files_touched": [
+        "patient/config.py",
+        "patient/policy/refund_policy.md"
+      ]
+    }
+  ],
+  "assumption_quote": "Update the support agent to use the standard 30 day refund window.",
+  "quote_verified": true,
+  "why_wrong": "This instruction contradicts the pre-commit source-of-truth refund policy, which allows refunds only within 14 days of delivery. By changing the window to 30 days, the agent issued refunds for orders 15, 18, 22, and 30 days after delivery, triggering the refund guard to fail in each trace because those should have been refused under the 14-day policy.",
+  "source_of_truth": "- Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.",
+  "restore": "Set REFUND_WINDOW_DAYS = 14 in patient/config.py and revert patient/policy/refund_policy.md to say \"Refunds are allowed only within 14 days of delivery.\"",
+  "policy_tampered": true,
+  "confidence": 0.93,
+  "evidence_level": "checkpoint",
+  "fix": {
+    "branch": "rootline/fix-e659bd38848c",
+    "commit": "0d7f3982060b1510d522b3f1f94172828064ff0c",
+    "files": [
+      "patient/config.py",
+      "patient/policy/refund_policy.md"
+    ],
+    "fix_mode": "agent",
+    "restored_source_of_truth": true,
+    "pushed": true,
+    "push_error": null,
+    "trail": "branch 'rootline/fix-e659bd38848c' set up to track 'origin/rootline/fix-e659bd38848c'.\nPushed branch rootline/fix-e659bd38848c to origin\nCreated trail \"Rootline: The agent issued refunds by calling issue_refund for KC-1008 (amount_paise 13990\" for branch rootline/fix-e659bd38848c (ID: 01M4KSZ72S1R2M686N3N1MYBST)\n  URL: https://entire.io/gh/bruce249/rootline/trails/2\n",
+    "trail_error": null,
+    "finding": "{\n  \"id\": \"01M4KSZB09Y4WSCXAS6S5DYETZ\",\n  \"trailId\": \"01M4KSZ72S1R2M686N3N1MYBST\",\n  \"repositoryId\": \"01M4K8XRV30XXEQ24K2YXYGJ20\",\n  \"reviewId\": \"01M4KSZAMVX75C0KHWX2P1AXDY\",\n  \"codeVersionId\": \"01M4KSZAMH5PPRECSWA1BR0XMK\",\n  \"actorId\": \"01KZKZ1B4X8YTMF94A35EECBSQ\",\n  \"title\": null,\n  \"body\": \"Introduced by Claude Code session 98b2dc5b-dc72-4ea9-afec-653922ba1825 (checkpoint 01M4KBD5VKTNXSMEK8K1RY4VM7) in 8c35f9e.\\nPrompt: Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.\\n\\nAssumption: \\\"Update the support agent to use the standard 30 day refund window.\\\"\\nThis instruction contradicts the pre-commit source-of-truth refund policy, which allows refunds only within 14 days of delivery. By changing the window to 30 days, the agent issued refunds for orders 15, 18, 22, and 30 days after delivery, triggering the refund guard to fail in each trace because those should have been refused under the 14-day policy.\",\n  \"severity\": \"high\",\n  \"confidence\": 0.93,\n  \"status\": \"open\",\n  \"statusReason\": null,\n  \"staleOutcome\": \"current\",\n  \"staleCheckedAt\": null,\n  \"staleCheckedCodeVersionId\": null,\n  \"clientId\": \"rootline-e659bd38848c-1\",\n  \"clientIdHash\": \"b1a7509ca0965a482d788dcf0a3f16817e692f9088cbfccaa01076b10d18be07\",\n  \"createdAt\": \"2026-10-10T21:02:18.12Z\",\n  \"updatedAt\": \"2026-10-10T21:02:18.12Z\",\n  \"location\": {\n    \"id\": \"01M4KSZB09AH0CTD9YP4KJEQ34\",\n    \"reviewCommentId\": \"01M4KSZB09Y4WSCXAS6S5DYETZ\",\n    \"codeVersionId\": \"01M4KSZAMH5PPRECSWA1BR0XMK\",\n    \"granularity\": \"line\",\n    \"filePath\": \"patient/config.py\",\n    \"startLine\": 2,\n    \"startColumn\": null,\n    \"endLine\": null,\n    \"endColumn\": null,\n    \"selectedText\": \"REFUND_WINDOW_DAYS = 14\",\n    \"nearbyText\": null,\n    \"language\": null\n  },\n  \"discussionId\": \"01M4KSZB09CJGTNQ9QGH697SS2\"\n}\n",
+    "finding_error": null
+  },
+  "fix_commit_url": "https://entire.io/gh/bruce249/rootline/commit/0d7f3982060b1510d522b3f1f94172828064ff0c",
+  "diff": "diff --git a/patient/config.py b/patient/config.py\nindex 9e5b87d..2683701 100644\n--- a/patient/config.py\n+++ b/patient/config.py\n@@ -1,5 +1,5 @@\n FAKE_TODAY = \"2026-10-10\"\n-REFUND_WINDOW_DAYS = 30\n+REFUND_WINDOW_DAYS = 14\n ESCALATE_ABOVE_PAISE = 500_000\n HISTORY_WINDOW = 10\n INVENTORY_RETRIES = 2\ndiff --git a/patient/policy/refund_policy.md b/patient/policy/refund_policy.md\nindex 863530a..526e130 100644\n--- a/patient/policy/refund_policy.md\n+++ b/patient/policy/refund_policy.md\n@@ -2,7 +2,7 @@\n \n This document is the source of truth for customer refunds.\n \n-- Refunds are allowed only within 30 days of delivery. The full order amount only. No partial refunds.\n+- Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.\n - All amounts are integers in paise. \u20b91 = 100 paise.\n - Any refund above \u20b95,000 (500000 paise) must be escalated, not refunded.\n - Never reveal any customer's phone number or email.\n",
+  "verify": {
+    "passed": true,
+    "after_passed": 24,
+    "after_total": 24,
+    "after_sha": "0d7f3982060b1510d522b3f1f94172828064ff0c",
+    "before_passed": 17,
+    "before_total": 21,
+    "target_tickets": [
+      "T06",
+      "T07",
+      "T08",
+      "T18"
+    ],
+    "target_fixed": [
+      "T06",
+      "T07",
+      "T08",
+      "T18"
+    ],
+    "still_failing": [],
+    "attempt": 1,
+    "fix_commit": "0d7f3982060b1510d522b3f1f94172828064ff0c",
+    "triage_updates": []
+  },
+  "guard": {
+    "created": [],
+    "existing": [
+      "Rootline guard: refund check failing"
+    ],
+    "skipped": [],
+    "errors": []
+  },
+  "errors": []
+}

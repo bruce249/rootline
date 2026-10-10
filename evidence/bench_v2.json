@@ -1,0 +1,27 @@
+{
+  "version": "v2",
+  "totals": {
+    "runs": 1,
+    "commit_correct": 1,
+    "quote_match": 1,
+    "fix_verified": 1
+  },
+  "rows": [
+    {
+      "id": "R1",
+      "run_id": "4fba03c6d784",
+      "status": "COMPLETE",
+      "commit_correct": true,
+      "found_commit": "8c35f9e3a76e",
+      "quote_match": true,
+      "quote_verified_in_transcript": true,
+      "policy_tamper_detected": true,
+      "fix_verified": true,
+      "before": "20/24",
+      "after": "24/24",
+      "attempts": 1,
+      "duration_s": 307.2,
+      "cost_usd": null
+    }
+  ]
+}

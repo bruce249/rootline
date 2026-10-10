@@ -1,0 +1,75 @@
+{
+  "source": "neatlogs search_traces, matched by run id and replay label inside each run's time window",
+  "note": "Fixer agent tokens are recorded by Entire per checkpoint, not in neatlogs.",
+  "runs": [
+    {
+      "run_id": "4fba03c6d784",
+      "status": "COMPLETE",
+      "attempts": 1,
+      "resumed": false,
+      "rootline_traces": 0,
+      "replay_traces_found": 0,
+      "replay_traces_expected": 24,
+      "rootline_cost_usd": 0,
+      "rootline_tokens": 0,
+      "replay_cost_usd": 0,
+      "replay_tokens": 0,
+      "wall_minutes": 5.12,
+      "rootline_llm_usage_local": {
+        "calls": 2,
+        "prompt_tokens": 6910,
+        "completion_tokens": 3405,
+        "models": [
+          "gpt-5-2025-08-07"
+        ]
+      }
+    },
+    {
+      "run_id": "ce0ee866cb90",
+      "status": "COMPLETE",
+      "attempts": 1,
+      "resumed": true,
+      "rootline_traces": 2,
+      "replay_traces_found": 22,
+      "replay_traces_expected": 24,
+      "rootline_cost_usd": 0.0,
+      "rootline_tokens": 0,
+      "replay_cost_usd": 0.040074,
+      "replay_tokens": 58320,
+      "wall_minutes": 24.58,
+      "rootline_llm_usage_local": null
+    },
+    {
+      "run_id": "d6efd4a8dc53",
+      "status": "COMPLETE",
+      "attempts": 1,
+      "resumed": false,
+      "rootline_traces": 1,
+      "replay_traces_found": 8,
+      "replay_traces_expected": 24,
+      "rootline_cost_usd": 0.013066,
+      "rootline_tokens": 3088,
+      "replay_cost_usd": 0.011842,
+      "replay_tokens": 15708,
+      "wall_minutes": 7.42,
+      "rootline_llm_usage_local": null
+    },
+    {
+      "run_id": "e659bd38848c",
+      "status": "COMPLETE",
+      "attempts": 1,
+      "resumed": false,
+      "rootline_traces": 0,
+      "replay_traces_found": 15,
+      "replay_traces_expected": 24,
+      "rootline_cost_usd": 0,
+      "rootline_tokens": 0,
+      "replay_cost_usd": 0.027018,
+      "replay_tokens": 37912,
+      "wall_minutes": 7.68,
+      "rootline_llm_usage_local": null
+    }
+  ],
+  "patient_avg_ticket_cost_usd": 0.001702,
+  "patient_tickets_sampled": 100
+}

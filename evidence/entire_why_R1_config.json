@@ -1,0 +1,44 @@
+{
+  "file": "patient/config.py",
+  "line": {
+    "line_number": 2,
+    "authorship": "ai",
+    "tag": "[AI]",
+    "commit_sha": "8c35f9e3a76e08ca79d5100c6fd7407f0b39239e",
+    "short_commit_sha": "8c35f9e3",
+    "author": "[email]",
+    "author_time": "2026-10-10T16:47:42Z",
+    "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+    "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+    "agent": "Claude Code",
+    "model": "claude-opus-5-5",
+    "prompt": "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+    "content": "REFUND_WINDOW_DAYS = 30",
+    "candidates": [
+      {
+        "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+        "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+        "agent": "Claude Code",
+        "model": "claude-opus-5-5",
+        "prompt": "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+        "files_touched": [
+          "patient/config.py",
+          "patient/policy/refund_policy.md"
+        ]
+      }
+    ]
+  },
+  "checkpoints": {
+    "01M4KBD5VKTNXSMEK8K1RY4VM7": {
+      "checkpoint_id": "01M4KBD5VKTNXSMEK8K1RY4VM7",
+      "session_id": "98b2dc5b-dc72-4ea9-afec-653922ba1825",
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "prompt": "Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.",
+      "files_touched": [
+        "patient/config.py",
+        "patient/policy/refund_policy.md"
+      ]
+    }
+  }
+}

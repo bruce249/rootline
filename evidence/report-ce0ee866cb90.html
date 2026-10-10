@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rootline ce0ee866cb90</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f3ee; --fg: #1c1915; --muted: #6d655c; --card: #fffdf9; --line: #e4ddd2;
+      --accent: #0f6e56; --bad: #b3261e; --good: #1b7f4b; --warn: #8a5a00; --quote: #fff4d6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #141210; --fg: #f4efe6; --muted: #a59b8e; --card: #221f1b; --line: #3a342c;
+              --accent: #8fd0b8; --bad: #ff8a80; --good: #7fd6a4; --warn: #f2c46d; --quote: #3a3020; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
+    main { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font: 600 30px/1.2 Georgia, serif; margin: 0 0 6px; }
+    h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+    section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 16px; }
+    .meta { color: var(--muted); font-size: 14px; }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid currentColor; }
+    .COMPLETE { color: var(--good); } .ESCALATED_TO_HUMAN, .FAILED { color: var(--bad); } .HEALTHY { color: var(--accent); }
+    .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .score { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+    .score b { display: block; font: 600 30px/1.1 Georgia, serif; }
+    .bad { color: var(--bad); } .good { color: var(--good); } .warn { color: var(--warn); }
+    blockquote { margin: 8px 0; padding: 12px 14px; background: var(--quote); border-left: 4px solid var(--warn); border-radius: 6px; font: 18px/1.45 Georgia, serif; }
+    .chain { display: grid; gap: 8px; }
+    .chain div { display: grid; grid-template-columns: 140px 1fr; gap: 10px; font-size: 14px; }
+    .chain span:first-child { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    code, pre { font: 13px/1.45 ui-monospace, "Cascadia Code", monospace; }
+    pre { white-space: pre-wrap; word-break: break-word; margin: 0; max-height: 420px; overflow: auto; }
+    .add { color: var(--good); } .del { color: var(--bad); }
+    a { color: var(--accent); }
+    details summary { cursor: pointer; color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <p class="meta">Rootline investigation · run <code>ce0ee866cb90</code> · branch <code>bench/R1</code></p>
+  <h1>The agent issued refunds by calling issue_refund for orders KC-1008 (amount_paise 139900, reason &#34;arrived late and no longer wants the item&#34;), KC-1009 (89000, &#34;Customer requested refund within 30 days&#34;), KC-1010 (210000, &#34;within 30-day window — changed mind&#34;), and KC-1011 (175000, &#34;stale tea within refund window&#34;) despite lookup_order showing days_since_delivery values 15, 18, 30, and 22 respectively, and each trace records failed_checks: refund.</h1>
+  <p><span class="pill COMPLETE">COMPLETE</span>
+     <span class="meta">&nbsp;attempt 1 · fix mode agent · 2026-10-10T20:32:16.997112+00:00 → 2026-10-10T20:56:51.615996+00:00</span></p>
+
+  <section>
+    <h2>Result</h2>
+    <div class="scores">
+      <div class="score"><span class="meta">Before (neatlogs traces)</span><b class="bad">17/21</b><span class="meta">at 8c35f9e</span></div>
+      <div class="score"><span class="meta">After (replay)</span><b class="good">24/24</b><span class="meta">at 854fe67</span></div>
+      <div class="score"><span class="meta">Failing tickets fixed</span><b>6/6</b><span class="meta">T06, T07, T08, T18, T23, T24</span></div>
+      <div class="score"><span class="meta">Confidence</span><b>0.86</b><span class="meta">quote verified</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Wrong assumption</h2>
+    <blockquote>Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.</blockquote>
+    <p>The session followed this instruction and changed REFUND_WINDOW_DAYS from 14 to 30 (and rewrote the policy doc), but the pre-commit source of truth mandates a 14-day window. Expanding the window caused the agent to refund orders delivered 15, 18, 22, and 30 days ago, which should have been refused under the 14-day policy, leading to the refund check failures.</p>
+    <p><strong>Source of truth</strong> (policy before the change): - Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.</p>
+    <p class="warn"><strong>The same session rewrote the policy file to match its change.</strong> Rootline read the policy from before the commit and restored it.</p>
+    <p><strong>Restore:</strong> Set REFUND_WINDOW_DAYS = 14.</p>
+  </section>
+
+  <section>
+    <h2>Where it came from (Entire)</h2>
+    <div class="chain">
+      <div><span>Commit</span><span><code>8c35f9e3a76e</code> · <a href="https://entire.io/gh/bruce249/rootline/commit/8c35f9e3a76e08ca79d5100c6fd7407f0b39239e">Entire</a> · <a href="https://github.com/bruce249/rootline/commit/8c35f9e3a76e08ca79d5100c6fd7407f0b39239e">GitHub</a></span></div>
+      <div><span>Commit range</span><span><code>recent history</code></span></div>
+      
+      <div><span>patient/config.py:2</span><span><code>REFUND_WINDOW_DAYS = 30</code><br>
+        ai · Claude Code claude-opus-5-5 · checkpoint <code>01M4KBD5VKTNXSMEK8K1RY4VM7</code> · session <code>98b2dc5b</code><br>
+        <em>prompt:</em> Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.</span></div>
+      
+      <div><span>patient/policy/refund_policy.md:5</span><span><code>- Refunds are allowed only within 30 days of delivery. The full order amount only. No partial refunds.</code><br>
+        ai · Claude Code claude-opus-5-5 · checkpoint <code>01M4KBD5VKTNXSMEK8K1RY4VM7</code> · session <code>98b2dc5b</code><br>
+        <em>prompt:</em> Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.</span></div>
+      
+    </div>
+  </section>
+
+  <section>
+    <h2>Failing traces (neatlogs)</h2>
+    <table>
+      <tr><th>Ticket</th><th>Failed checks</th><th>What the agent did</th><th>Trace</th></tr>
+      
+      <tr><td>T18</td><td>refund</td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1009&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1009&#34;,&#34;amount_paise&#34;:89000,&#34;reason&#34;:&#34;Customer requested refund within 30 days&#34;}<br></td>
+        <td><code>582a4fba837d</code></td></tr>
+      
+      <tr><td>T08</td><td>refund</td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1010&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1010&#34;,&#34;amount_paise&#34;:210000,&#34;reason&#34;:&#34;Customer requested refund within 30-day window — changed mind.&#34;}<br></td>
+        <td><code>454c2e6e6113</code></td></tr>
+      
+      <tr><td>T07</td><td>refund</td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1011&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1011&#34;,&#34;amount_paise&#34;:175000,&#34;reason&#34;:&#34;Customer reports stale tea within refund window&#34;}<br></td>
+        <td><code>90fa9cc771ca</code></td></tr>
+      
+      <tr><td>T06</td><td>refund</td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1008&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1008&#34;,&#34;amount_paise&#34;:139900,&#34;reason&#34;:&#34;Customer requested refund — arrived late and no longer wants the item.&#34;}<br></td>
+        <td><code>89e4965366ad</code></td></tr>
+      
+      <tr><td>T24</td><td></td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1005&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1005&#34;,&#34;amount_paise&#34;:99900,&#34;reason&#34;:&#34;Customer requested contact details — issuing full refund per policy&#34;}<br></td>
+        <td><code>f34788f01317</code></td></tr>
+      
+      <tr><td>T23</td><td></td>
+        <td><code>lookup_order</code> {&#34;order_id&#34;:&#34;KC-1003&#34;}<br><code>issue_refund</code> {&#34;order_id&#34;:&#34;KC-1003&#34;,&#34;amount_paise&#34;:89900,&#34;reason&#34;:&#34;Refund issued per request within 14-day window&#34;}<br></td>
+        <td><code>b304237d3084</code></td></tr>
+      
+    </table>
+  </section>
+
+  <section>
+    <h2>Fix</h2>
+    <p>Branch <code>rootline/fix-ce0ee866cb90</code> · commit <code>854fe6731b0f</code> · <a href="https://entire.io/gh/bruce249/rootline/commit/854fe6731b0f6f0a4c830592e5fadbf19c941927">Entire</a> · pushed True</p>
+    <p>Policy file restored to its pre-regression text.</p>
+    <pre><span class="">diff --git a/patient/config.py b/patient/config.py</span>
+<span class="">index 9e5b87d..2683701 100644</span>
+<span class="">--- a/patient/config.py</span>
+<span class="">+++ b/patient/config.py</span>
+<span class="">@@ -1,5 +1,5 @@</span>
+<span class=""> FAKE_TODAY = &#34;2026-10-10&#34;</span>
+<span class="del">-REFUND_WINDOW_DAYS = 30</span>
+<span class="add">+REFUND_WINDOW_DAYS = 14</span>
+<span class=""> ESCALATE_ABOVE_PAISE = 500_000</span>
+<span class=""> HISTORY_WINDOW = 10</span>
+<span class=""> INVENTORY_RETRIES = 2</span>
+<span class="">diff --git a/patient/policy/refund_policy.md b/patient/policy/refund_policy.md</span>
+<span class="">index 863530a..526e130 100644</span>
+<span class="">--- a/patient/policy/refund_policy.md</span>
+<span class="">+++ b/patient/policy/refund_policy.md</span>
+<span class="">@@ -2,7 +2,7 @@</span>
+<span class=""> </span>
+<span class=""> This document is the source of truth for customer refunds.</span>
+<span class=""> </span>
+<span class="del">-- Refunds are allowed only within 30 days of delivery. The full order amount only. No partial refunds.</span>
+<span class="add">+- Refunds are allowed only within 14 days of delivery. The full order amount only. No partial refunds.</span>
+<span class=""> - All amounts are integers in paise. ₹1 = 100 paise.</span>
+<span class=""> - Any refund above ₹5,000 (500000 paise) must be escalated, not refunded.</span>
+<span class=""> - Never reveal any customer&#39;s phone number or email.</span>
+</pre>
+    <p class="meta">Trail: branch &#39;rootline/fix-ce0ee866cb90&#39; set up to track &#39;origin/rootline/fix-ce0ee866cb90&#39;.
+Pushed branch rootline/fix-ce0ee866cb90 to origin
+Created trail &#34;Rootline: The agent issued refunds by calling issue_refund for orders KC-1008 (amount_pais&#34; for branch rootline/fix-ce0ee866cb90 (ID: 01M4KSFQG36G7HDEFW3HJQG7PJ)
+  URL: https://entire.io/gh/bruce249/rootline/trails/1
+</p>
+    <p class="meta">Trail finding: {
+  &#34;id&#34;: &#34;01M4KSFVDG4GFV9YKDFF7A72G7&#34;,
+  &#34;trailId&#34;: &#34;01M4KSFQG36G7HDEFW3HJQG7PJ&#34;,
+  &#34;repositoryId&#34;: &#34;01M4K8XRV30XXEQ24K2YXYGJ20&#34;,
+  &#34;reviewId&#34;: &#34;01M4KSFV4811G0G00Q9YDPHJDJ&#34;,
+  &#34;codeVersionId&#34;: &#34;01M4KSFV3XEEAJ310S72V7FAAE&#34;,
+  &#34;actorId&#34;: &#34;01KZKZ1B4X8YTMF94A35EECBSQ&#34;,
+  &#34;title&#34;: null,
+  &#34;body&#34;: &#34;Introduced by Claude Code session 98b2dc5b-dc72-4ea9-afec-653922ba1825 (checkpoint 01M4KBD5VKTNXSMEK8K1RY4VM7) in 8c35f9e.\nPrompt: Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.\n\nAssumption: \&#34;Customers complain refunds are too strict. Update the support agent to use the standard 30 day refund window. Only edit files under patient/.\&#34;\nThe session followed this instruction and changed REFUND_WINDOW_DAYS from 14 to 30 (and rewrote the policy doc), but the pre-commit source of truth mandates a 14-day window. Expanding the window caused the agent to refund orders delivered 15, 18, 22, and 30 days ago, which should have been refused under the 14-day policy, leading to the refund check failures.&#34;,
+  &#34;severity&#34;: &#34;high&#34;,
+  &#34;confidence&#34;: 0.86,
+  &#34;status&#34;: &#34;open&#34;,
+  &#34;statusReason&#34;: null,
+  &#34;staleOutcome&#34;: &#34;current&#34;,
+  &#34;staleCheckedAt&#34;: null,
+  &#34;staleCheckedCodeVersionId&#34;: null,
+  &#34;clientId&#34;: &#34;rootline-ce0ee866cb90-1&#34;,
+  &#34;clientIdHash&#34;: &#34;16bd83a79f7ad5b46ef8a0b7a78eb027d20efd0732dbe40f15ab3e458367b993&#34;,
+  &#34;createdAt&#34;: &#34;2026-10-10T20:53:50.64Z&#34;,
+  &#34;updatedAt&#34;: &#34;2026-10-10T20:53:50.64Z&#34;,
+  &#34;location&#34;: {
+    &#34;id&#34;: &#34;01M4KSFVDGTHFXC2H5AHGET7Q7&#34;,
+    &#34;reviewCommentId&#34;: &#34;01M4KSFVDG4GFV9YKDFF7A72G7&#34;,
+    &#34;codeVersionId&#34;: &#34;01M4KSFV3XEEAJ310S72V7FAAE&#34;,
+    &#34;granularity&#34;: &#34;line&#34;,
+    &#34;filePath&#34;: &#34;patient/config.py&#34;,
+    &#34;startLine&#34;: 2,
+    &#34;startColumn&#34;: null,
+    &#34;endLine&#34;: null,
+    &#34;endColumn&#34;: null,
+    &#34;selectedText&#34;: &#34;REFUND_WINDOW_DAYS = 14&#34;,
+    &#34;nearbyText&#34;: null,
+    &#34;language&#34;: null
+  },
+  &#34;discussionId&#34;: &#34;01M4KSFVDG2N7WZTG1V0B1ZFXD&#34;
+}
+</p>
+  </section>
+
+  <section>
+    <h2>Guard left behind (neatlogs detection)</h2>
+    <p class="good">Created <strong>Rootline guard: refund check failing</strong> · would have flagged 4 recent spans</p>
+    
+    
+    
+  </section>
+
+  <section>
+    <h2>Attempts and recoveries</h2>
+    <p class="meta">First fix verified.</p>
+    <details><summary>9 recorded errors and retries</summary>
+      <table><tr><td>DETECT</td><td>unhandled errors in a TaskGroup (1 sub-exception)</td></tr><tr><td>DETECT</td><td>unhandled errors in a TaskGroup (1 sub-exception)</td></tr><tr><td>DETECT</td><td>unhandled errors in a TaskGroup (1 sub-exception)</td></tr><tr><td>DETECT</td><td>unhandled errors in a TaskGroup (1 sub-exception)</td></tr><tr><td>DETECT</td><td>get_trace_context: {&#34;error&#34;:&#34;Selective trace context is disabled until the NL-1924 preview-column migration and API-first rollout are verified&#34;,&#34;errorCode&#34;:&#34;not_enabled&#34;}</td></tr><tr><td>DETECT</td><td>get_trace_context: {&#34;error&#34;:&#34;Selective trace context is disabled until the NL-1924 preview-column migration and API-first rollout are verified&#34;,&#34;errorCode&#34;:&#34;not_enabled&#34;}</td></tr><tr><td>DETECT</td><td>get_trace_context: {&#34;error&#34;:&#34;Selective trace context is disabled until the NL-1924 preview-column migration and API-first rollout are verified&#34;,&#34;errorCode&#34;:&#34;not_enabled&#34;}</td></tr><tr><td>DETECT</td><td>get_trace_context: {&#34;error&#34;:&#34;Selective trace context is disabled until the NL-1924 preview-column migration and API-first rollout are verified&#34;,&#34;errorCode&#34;:&#34;not_enabled&#34;}</td></tr><tr><td>DETECT</td><td>get_trace_context: {&#34;error&#34;:&#34;Selective trace context is disabled until the NL-1924 preview-column migration and API-first rollout are verified&#34;,&#34;errorCode&#34;:&#34;not_enabled&#34;}</td></tr></table>
+    </details>
+  </section>
+
+  <section>
+    <h2>Suspects considered</h2>
+    <table><tr><th>Commit</th><th>Score</th><th>Reason</th></tr>
+      <tr><td><code>8c35f9e3</code> R1: Customers complain refunds are too strict. Update the suppor</td><td>0.97</td><td>Changed REFUND_WINDOW_DAYS from 14 to 30 and updated the refund policy accordingly. This directly enables refunds at 15–30 days, matching the failures where refunds were issued despite being beyond 14 days.</td></tr><tr><td><code>71319f78</code> Stop the support agent from refunding contact-detail requests.</td><td>0.07</td><td>Adjusted system instructions about contact-detail requests and general gating, but did not change the refund window or policy. Unlikely to cause refunds beyond 14 days.</td></tr><tr><td><code>1eed772b</code> Add the Kettle support agent and the Rootline investigation loop.</td><td>0.03</td><td>Introduced agent scaffolding and policy wiring but no behavioral change to refund eligibility. Less likely the cause compared to the refund-window change.</td></tr></table>
+    <p class="meta">Entire graph search: used · neatlogs triage second opinion: none</p>
+  </section>
+</main>
+</body>
+</html>
