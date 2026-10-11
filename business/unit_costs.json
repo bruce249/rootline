@@ -1,7 +1,14 @@
 {
-  "note": "Leave null until a real bench run records cost, tokens, and minutes. Do not invent figures.",
-  "avg_investigation_cost_usd": null,
-  "avg_investigation_tokens": null,
-  "avg_investigation_minutes": null,
-  "ec2_monthly_usd": null
+  "note": "Measured from neatlogs traces by `rootline costs`. Excludes the fixer agent (tracked by Entire). EC2 is filled by hand.",
+  "avg_investigation_cost_usd": 0.0841,
+  "avg_investigation_tokens": 71162,
+  "avg_investigation_minutes": 6.74,
+  "ec2_monthly_usd": null,
+  "investigations_measured": 3,
+  "measured_run_ids": [
+    "4fba03c6d784",
+    "d6efd4a8dc53",
+    "e659bd38848c"
+  ],
+  "patient_avg_ticket_cost_usd": 0.001535
 }
